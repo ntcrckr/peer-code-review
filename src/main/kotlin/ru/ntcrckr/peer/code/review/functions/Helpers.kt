@@ -27,9 +27,6 @@ fun Array<String>.executeIn(workingDir: Path): String {
     return proc.inputStream.bufferedReader().readText()
 }
 
-fun String.executeIn(workingDir: Path): String =
-    split("\\s".toRegex()).toTypedArray<String>().executeIn(workingDir)
-
 inline fun String.ifNotEmpty(block: (String) -> Unit) {
     if (isNotEmpty())
         block(this)

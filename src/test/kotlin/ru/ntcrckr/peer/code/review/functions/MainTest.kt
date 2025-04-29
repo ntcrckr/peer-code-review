@@ -21,7 +21,7 @@ class MainTest : RemoveRepositoriesBeforeAndAfterTest {
         )
         val copy = Copy(
             Copy.Local(testCopyPath, source.online.repositoryName.nameOfCopy()),
-            Copy.Online("some_repository", 1),
+            Copy.Online("some_repository", 1, 0),
         )
         val config = Config(true)
         val pair = LocalRepositoryPair.fromOnlineSource(teacher, source, copy, config)
@@ -41,7 +41,7 @@ class MainTest : RemoveRepositoriesBeforeAndAfterTest {
         )
         val copy = Copy(
             Copy.Local(testCopyPath, source.online.repositoryName.nameOfCopy()),
-            Copy.Online("some_repository", 1),
+            Copy.Online("some_repository", 1, 0),
         )
         val config = Config(true)
         val localSource = cloneOnlineRepository(source, teacher)
@@ -59,7 +59,7 @@ class MainTest : RemoveRepositoriesBeforeAndAfterTest {
         )
         val copy = Copy(
             Copy.Local(testCopyPath, source.online.repositoryName.nameOfCopy()),
-            Copy.Online("some_repository", 1),
+            Copy.Online("some_repository", 1, 0),
         )
         val sourceRepository =
             cloneOnlineRepository(source, teacher)

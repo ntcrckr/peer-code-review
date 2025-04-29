@@ -17,6 +17,7 @@ dependencies {
     implementation("com.github.mwiede:jsch:0.2.25")
     implementation("com.jcabi:jcabi-github:1.8.0")
     implementation("org.glassfish:javax.json:1.1.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
 }
 
 tasks.test {
