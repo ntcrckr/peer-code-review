@@ -16,7 +16,7 @@ class CloneLocalRepositoryPairTest : RemoveRepositoriesBeforeAndAfterTest {
                 testCopyPath,
                 repositoryName,
             ),
-            Copy.Online(repositoryName, 1),
+            Copy.Online(repositoryName, 1, 0),
         )
 
         val sourceRepositoryName = "sourceRepo"

@@ -18,7 +18,7 @@ class AnonymizeCommitDataTest : RemoveRepositoriesBeforeAndAfterTest {
         )
         val copy = Copy(
             Copy.Local(testCopyPath, source.online.repositoryName.nameOfCopy()),
-            Copy.Online("TODO", 1),
+            Copy.Online("TODO", 1, 0),
         )
         val pair = LocalRepositoryPair.createNew(
             Teacher("pcrp-teacher", getGitHubToken()),
