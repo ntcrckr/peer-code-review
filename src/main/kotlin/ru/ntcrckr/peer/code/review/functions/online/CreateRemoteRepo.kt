@@ -1,4 +1,4 @@
-package ru.ntcrckr.peer.code.review.functions.remote
+package ru.ntcrckr.peer.code.review.functions.online
 
 import io.ktor.client.request.*
 import io.ktor.http.*

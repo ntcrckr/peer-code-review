@@ -3,12 +3,12 @@ package ru.ntcrckr.peer.code.review.functions.local
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
-import ru.ntcrckr.peer.code.review.functions.RemoveRepositoriesAfterTest
+import ru.ntcrckr.peer.code.review.functions.RemoveRepositoriesBeforeAndAfterTest
 import ru.ntcrckr.peer.code.review.functions.createTestLocalRepository
 import ru.ntcrckr.peer.code.review.functions.path
 import kotlin.io.path.exists
 
-class CreateLocalRepositoryPairTest : RemoveRepositoriesAfterTest {
+class CreateLocalRepositoryPairTest : RemoveRepositoriesBeforeAndAfterTest {
     @Test
     fun `create dummy repository`() {
         // given

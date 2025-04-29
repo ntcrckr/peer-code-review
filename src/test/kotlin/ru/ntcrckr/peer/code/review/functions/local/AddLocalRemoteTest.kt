@@ -2,12 +2,12 @@ package ru.ntcrckr.peer.code.review.functions.local
 
 import org.junit.jupiter.api.Assertions.assertAll
 import org.junit.jupiter.api.Assertions.assertTrue
-import ru.ntcrckr.peer.code.review.functions.RemoveRepositoriesAfterTest
+import ru.ntcrckr.peer.code.review.functions.RemoveRepositoriesBeforeAndAfterTest
 import ru.ntcrckr.peer.code.review.functions.createTestLocalRepository
 import ru.ntcrckr.peer.code.review.functions.path
 import kotlin.test.Test
 
-class AddLocalRemoteTest : RemoveRepositoriesAfterTest {
+class AddLocalRemoteTest : RemoveRepositoriesBeforeAndAfterTest {
     @Test
     fun `add source local remote`() {
         // given

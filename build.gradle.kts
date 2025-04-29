@@ -11,13 +11,12 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("io.ktor:ktor-client-core:2.3.5")
-    implementation("io.ktor:ktor-client-cio:2.3.5")
-    implementation("io.ktor:ktor-client-logging:2.3.5")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
     implementation("ch.qos.logback:logback-classic:1.4.12")
     implementation("com.github.sya-ri:kgit:1.1.0")
+    implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:7.0.0.202409031743-r")
+    implementation("com.github.mwiede:jsch:0.2.25")
+    implementation("com.jcabi:jcabi-github:1.8.0")
+    implementation("org.glassfish:javax.json:1.1.4")
 }
 
 tasks.test {

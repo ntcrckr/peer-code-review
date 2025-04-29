@@ -6,10 +6,19 @@ import org.junit.jupiter.api.Test
 import ru.ntcrckr.peer.code.review.functions.*
 import kotlin.io.path.exists
 
-class CloneLocalRepositoryPairTest : RemoveRepositoriesAfterTest {
+class CloneLocalRepositoryPairTest : RemoveRepositoriesBeforeAndAfterTest {
     @Test
     fun `clone dummy repository`() {
         // given
+        val repositoryName = "dummyRepo"
+        val copy = Copy(
+            Copy.Local(
+                testCopyPath,
+                repositoryName,
+            ),
+            Copy.Online(repositoryName, 1),
+        )
+
         val sourceRepositoryName = "sourceRepo"
         val sourceInitialBranchName = "master"
         val sourceRepository = createTestLocalRepository(sourceRepositoryName, sourceInitialBranchName)
@@ -18,17 +27,14 @@ class CloneLocalRepositoryPairTest : RemoveRepositoriesAfterTest {
         val testText = "test text"
         val testMessage = "test message"
         sourceRepository.addAndCommit(testFileName, testText, testMessage)
-
-        val repositoryName = "dummyRepo"
-        val remoteName = "source"
         // when
-        val repository = cloneLocalRepository(sourceRepository, testRepositoriesPath, repositoryName, remoteName)
+        val repository = cloneLocalRepository(sourceRepository, copy)
         // then
         val remote = repository.remoteList().single()
         assertAll(
             { assertTrue(repository.repository.remoteNames.contains("source")) },
             { assertTrue(remote.urIs.single().path == sourceRepository.path.toString()) },
-            { assertTrue(remote.name == remoteName) },
+            { assertTrue(remote.name == copy.local.localRemoteName) },
             { assertTrue(repository.path.resolve(testFileName).exists()) },
             { assertTrue(repository.path.resolve(testFileName).toFile().readText() == testText) },
             { assertTrue(repository.log().first().fullMessage == testMessage) },

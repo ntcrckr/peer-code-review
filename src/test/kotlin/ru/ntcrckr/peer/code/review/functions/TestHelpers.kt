@@ -38,3 +38,5 @@ fun KGit.commitWithTestFile(): KGit = also {
     add { addFilepattern(".") }
     commit { message = "testMessage$index" }
 }
+
+fun getGitHubToken(): String = System.getenv("GITHUB_TOKEN")
