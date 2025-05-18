@@ -1,8 +1,6 @@
-package ru.ntcrckr.peer.code.review.functions.local
+package ru.ntcrckr.peer.code.review.pair.git
 
 import com.github.syari.kgit.KGit
-import ru.ntcrckr.peer.code.review.functions.executeIn
-import ru.ntcrckr.peer.code.review.functions.path
 
 fun KGit.anonymizeCommitInfo(
     username: String,

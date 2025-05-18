@@ -1,7 +1,8 @@
 package ru.ntcrckr.peer.code.review.functions
 
 import com.github.syari.kgit.KGit
-import ru.ntcrckr.peer.code.review.functions.local.createLocalRepository
+import ru.ntcrckr.peer.code.review.functions.helpers.createLocalRepository
+import ru.ntcrckr.peer.code.review.pair.git.path
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -28,15 +29,6 @@ fun KGit.addAndCommit(
         .writeText(text)
     add { addFilepattern(".") }
     commit { this.message = message }
-}
-
-private var index = 0
-fun KGit.commitWithTestFile(): KGit = also {
-    path.resolve("testFile$index").toFile()
-        .also { it.createNewFile() }
-        .writeText("testText$index")
-    add { addFilepattern(".") }
-    commit { message = "testMessage$index" }
 }
 
 fun getGitHubToken(): String = System.getenv("GITHUB_TOKEN")

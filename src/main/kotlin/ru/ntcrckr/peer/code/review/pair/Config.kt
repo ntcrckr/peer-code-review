@@ -1,4 +1,4 @@
-package ru.ntcrckr.peer.code.review.functions
+package ru.ntcrckr.peer.code.review.pair
 
 data class Config(
     val anonymizeCommitInfo: Boolean,

@@ -1,4 +1,4 @@
-package ru.ntcrckr.peer.code.review.functions.local
+package ru.ntcrckr.peer.code.review.functions.helpers
 
 import com.github.syari.kgit.KGit
 import java.nio.file.Path
