@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version "2.1.21"
     id("org.jetbrains.compose") version "1.8.1"
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.21"
 }
@@ -10,16 +10,19 @@ version = "1.0-SNAPSHOT"
 repositories {
     google()
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
 dependencies {
     testImplementation(kotlin("test"))
 
-    // Miscellaneous
+    // Logging
     implementation("ch.qos.logback:logback-classic:1.4.12")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
 
-    // KGit + JGit for running git CLI commands
+    // Coroutines
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3")
+
+    // KGit + JGit for Git CLI commands
     implementation("com.github.sya-ri:kgit:1.1.0")
     implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:7.0.0.202409031743-r")
     implementation("com.github.mwiede:jsch:0.2.25")
@@ -28,16 +31,19 @@ dependencies {
     implementation("com.jcabi:jcabi-github:1.9.1")
     implementation("org.glassfish:javax.json:1.1.4")
 
-    // Exposed core and DAO modules
-    implementation("org.jetbrains.exposed:exposed-core:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.41.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.41.1")
+    // Exposed ORM
+    implementation("org.jetbrains.exposed:exposed-core:0.43.0")
+    implementation("org.jetbrains.exposed:exposed-dao:0.43.0")
+    implementation("org.jetbrains.exposed:exposed-jdbc:0.43.0")
 
     // H2 database driver
     implementation("com.h2database:h2:2.3.232")
 
-    // UI
+    // Compose Desktop UI + Material
     implementation(compose.desktop.currentOs)
+
+    // Material Icons Extended
+    implementation("org.jetbrains.compose.material3:material3-desktop:1.1.0")
 }
 
 tasks.test {
