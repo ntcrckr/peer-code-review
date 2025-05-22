@@ -1,17 +1,17 @@
 package ru.ntcrckr.peer.code.review.pair
 
 import com.jcabi.github.*
-import ru.ntcrckr.peer.code.review.dao.CodeComments
-import ru.ntcrckr.peer.code.review.dao.CodeComments.getInserterFor
-import ru.ntcrckr.peer.code.review.dao.CodeComments.getOtherIds
-import ru.ntcrckr.peer.code.review.dao.CodeComments.getOtherToThisIdMapping
-import ru.ntcrckr.peer.code.review.dao.CodeReplies
-import ru.ntcrckr.peer.code.review.dao.CodeReplies.getInserterFor
-import ru.ntcrckr.peer.code.review.dao.CodeReplies.getOtherIds
-import ru.ntcrckr.peer.code.review.dao.CodeReplies.getOtherToThisIdMapping
-import ru.ntcrckr.peer.code.review.dao.PullCommentsTable
-import ru.ntcrckr.peer.code.review.dao.PullCommentsTable.getInserterFor
-import ru.ntcrckr.peer.code.review.dao.PullCommentsTable.getOtherIds
+import ru.ntcrckr.peer.code.review.dao.old.CodeComments
+import ru.ntcrckr.peer.code.review.dao.old.CodeComments.getInserterFor
+import ru.ntcrckr.peer.code.review.dao.old.CodeComments.getOtherIds
+import ru.ntcrckr.peer.code.review.dao.old.CodeComments.getOtherToThisIdMapping
+import ru.ntcrckr.peer.code.review.dao.old.CodeReplies
+import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.getInserterFor
+import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.getOtherIds
+import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.getOtherToThisIdMapping
+import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable
+import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable.getInserterFor
+import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable.getOtherIds
 import ru.ntcrckr.peer.code.review.pair.github.*
 
 abstract class Online(

@@ -1,12 +1,12 @@
-package ru.ntcrckr.peer.code.review.dao
+package ru.ntcrckr.peer.code.review.dao.old
 
 import org.jetbrains.exposed.sql.JoinType.INNER
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import ru.ntcrckr.peer.code.review.dao.RepoTable.r1
-import ru.ntcrckr.peer.code.review.dao.RepoTable.r2
+import ru.ntcrckr.peer.code.review.dao.old.RepoTable.r1
+import ru.ntcrckr.peer.code.review.dao.old.RepoTable.r2
 import ru.ntcrckr.peer.code.review.pair.users.Performer
 import ru.ntcrckr.peer.code.review.pair.users.Reviewer
 import ru.ntcrckr.peer.code.review.pair.users.Teacher

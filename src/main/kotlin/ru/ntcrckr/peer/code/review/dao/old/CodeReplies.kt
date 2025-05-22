@@ -1,10 +1,10 @@
-package ru.ntcrckr.peer.code.review.dao
+package ru.ntcrckr.peer.code.review.dao.old
 
 import com.jcabi.github.PullComment
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import ru.ntcrckr.peer.code.review.dao.CodeReplies.Inserter
+import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.Inserter
 import ru.ntcrckr.peer.code.review.pair.github.id
 import ru.ntcrckr.peer.code.review.pair.github.replyId
 

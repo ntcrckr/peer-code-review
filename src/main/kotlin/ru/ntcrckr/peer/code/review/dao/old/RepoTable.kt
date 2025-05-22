@@ -1,4 +1,4 @@
-package ru.ntcrckr.peer.code.review.dao
+package ru.ntcrckr.peer.code.review.dao.old
 
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.alias
