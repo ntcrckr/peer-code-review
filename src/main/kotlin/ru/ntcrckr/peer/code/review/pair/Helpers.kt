@@ -1,7 +1,9 @@
 package ru.ntcrckr.peer.code.review.pair
 
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
@@ -13,5 +15,10 @@ fun String.nameOfCopy(prefix: String = "copyOf"): String =
 
 fun sshUrl(userName: String, repositoryName: String): String = "git@github.com:$userName/$repositoryName.git"
 
+private val db = Database.connect("jdbc:h2:./data/pcrp;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
+
 fun <T> pcrpTransaction(statement: Transaction.() -> T): T =
-    transaction(Database.connect("jdbc:h2:./data/pcrp;AUTO_SERVER=TRUE", driver = "org.h2.Driver"), statement)
+    transaction(db, statement = statement)
+
+suspend fun <T> suspendPcrpTransaction(statement: suspend Transaction.() -> T): T =
+    newSuspendedTransaction(Dispatchers.IO, db, statement = statement)

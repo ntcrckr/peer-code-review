@@ -3,9 +3,10 @@ package ru.ntcrckr.peer.code.review.pair
 import com.jcabi.github.Github
 import com.jcabi.github.RtGithub
 import org.slf4j.LoggerFactory
-import ru.ntcrckr.peer.code.review.dao.RepoPairTable
-import ru.ntcrckr.peer.code.review.dao.RepoPairTable.getId
-import ru.ntcrckr.peer.code.review.dao.RepoPairTable.insertRepoPair
+import ru.ntcrckr.peer.code.review.dao.RepoEntity
+import ru.ntcrckr.peer.code.review.dao.RepoPairEntity
+import ru.ntcrckr.peer.code.review.dao.RepoPairs
+import ru.ntcrckr.peer.code.review.dao.UserEntity
 import ru.ntcrckr.peer.code.review.pair.copy.Copy
 import ru.ntcrckr.peer.code.review.pair.source.Source
 import ru.ntcrckr.peer.code.review.pair.users.Performer
@@ -30,8 +31,16 @@ class RepoPair(
     private val github: Github = RtGithub(teacher.githubToken)
 
     private val pairId: Int = pcrpTransaction {
-        RepoPairTable.getId(performer, reviewer)
-            ?: RepoPairTable.insertRepoPair(performer, teacher, reviewer, localSourcePath, localCopyPath)
+        RepoPairs.getIdOrInsert(
+            -1,
+            RepoPairEntity(
+                teacher = UserEntity(teacher.username),
+                performer = UserEntity(performer.username),
+                sourceRepo = RepoEntity(performer.repoName, performer.pullId),
+                reviewer = UserEntity(reviewer.username),
+                copyRepo = TODO(),
+            )
+        )
     }
 
     val source = Source.init(pairId, github, performer, teacher.credentialsProvider, localSourcePath)
