@@ -14,38 +14,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 
+data class TextField(
+    val label: String,
+    val errorMessage: String,
+    val isError: (String) -> Boolean,
+)
+
 @Composable
 @Preview
-fun AddTextButtonAndPopup(
+fun AddEntityPopupButton(
     title: String,
-    label: String,
-    errorMessage: String,
-    onAdd: (String) -> Unit,
+    fields: List<TextField>,
+    onAdd: (List<String>) -> Unit,
 ) {
     var showPopup by remember { mutableStateOf(false) }
     IconButton(onClick = { showPopup = true }) {
         Icon(Icons.Filled.Add, contentDescription = title)
     }
-    AddTextPopup(
-        showPopup = showPopup,
-        title = title,
-        label = label,
-        errorMessage = errorMessage,
-        onClose = { showPopup = false },
-        onAdd = onAdd,
-    )
-}
-
-@Composable
-@Preview
-fun AddTextPopup(
-    showPopup: Boolean,
-    title: String,
-    label: String,
-    errorMessage: String,
-    onClose: () -> Unit,
-    onAdd: (String) -> Unit,
-) {
+    val onClose = { showPopup = false }
     if (showPopup) {
         Popup(
             alignment = Alignment.Center,
@@ -61,31 +47,39 @@ fun AddTextPopup(
                     modifier = Modifier.padding(16.dp).fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(title, style = MaterialTheme.typography.subtitle1)
-                    var isError by remember { mutableStateOf(false) }
-                    var text by remember { mutableStateOf("") }
-                    CheckedTextField(
-                        label = label,
-                        text = text,
-                        isError = isError,
-                        error = errorMessage,
-                        onChange = {
-                            text = it
-                            if (isError && it.isNotBlank()) isError = false
-                        }
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.subtitle1
                     )
+                    val values = remember { MutableList(fields.size) { mutableStateOf("") } }
+                    val isErrors = remember(key1 = onClose) { MutableList(fields.size) { mutableStateOf(false) } }
+                    fields.forEachIndexed { idx, textField ->
+                        CheckedTextField(
+                            label = textField.label,
+                            value = values[idx].value,
+                            isError = isErrors[idx].value,
+                            error = textField.errorMessage,
+                            onChange = { newValue ->
+                                values[idx].value = newValue
+                                if (isErrors[idx].value && !textField.isError(newValue))
+                                    isErrors[idx].value = false
+                            }
+                        )
+                    }
                     Row(
                         modifier = Modifier.align(Alignment.End),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Button(onClick = onClose) { Text("Закрыть") }
                         Button(onClick = {
-                            if (text.isBlank()) {
-                                isError = true
-                            } else {
-                                onAdd(text)
-                                text = ""
-                                isError = false
+                            values.forEachIndexed { idx, value ->
+                                if (fields[idx].isError(value.value))
+                                    isErrors[idx].value = true
+                            }
+                            if (isErrors.all { !it.value }) {
+                                onAdd(values.map { it.value })
+                                values.forEach { it.value = "" }
+                                isErrors.forEach { it.value = false }
                                 onClose()
                             }
                         }) { Text("Добавить") }
@@ -97,9 +91,10 @@ fun AddTextPopup(
 }
 
 @Composable
-fun CheckedTextField(label: String, text: String, isError: Boolean, error: String, onChange: (String) -> Unit) {
+@Preview
+private fun CheckedTextField(label: String, value: String, isError: Boolean, error: String, onChange: (String) -> Unit) {
     TextField(
-        value = text, onValueChange = onChange, modifier = Modifier.fillMaxWidth(), label = { Text(label) },
+        value = value, onValueChange = onChange, modifier = Modifier.fillMaxWidth(), label = { Text(label) },
         isError = isError, singleLine = true, colors = TextFieldDefaults.textFieldColors(
             focusedIndicatorColor = if (isError) Red else colors.primary,
             unfocusedIndicatorColor = if (isError) Red else colors.onSurface.copy(alpha = 0.5f)
