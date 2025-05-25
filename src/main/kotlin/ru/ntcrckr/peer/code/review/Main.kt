@@ -7,7 +7,7 @@ import ru.ntcrckr.peer.code.review.ui.Overview
 
 fun main() = application {
     setupDatabase()
-    Window(onCloseRequest = ::exitApplication, title = "Peer Code Review Platform") {
+    Window(onCloseRequest = ::exitApplication, title = "Платформа Peer Code Review") {
         Overview()
     }
 }

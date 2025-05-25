@@ -1,29 +1,27 @@
-package ru.ntcrckr.peer.code.review.dao.old
+package ru.ntcrckr.peer.code.review.dao
 
 import com.jcabi.github.PullComment
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.Inserter
+import ru.ntcrckr.peer.code.review.dao.PullCodeReplies.Inserter
 import ru.ntcrckr.peer.code.review.pair.github.id
 import ru.ntcrckr.peer.code.review.pair.github.replyId
 
-object CodeReplies : Table() {
-    val id = integer("id").autoIncrement()
-    override val primaryKey = PrimaryKey(id)
-    val repoPairId = integer("repo_pair_id").references(RepoPairTable.id)
+object PullCodeReplies : IntIdTable() {
+    val repoPairId = integer("repo_pair_id").references(RepoPairs.id)
     val sourceReplyId = long("source_reply_id")
     val sourceRepliedToId = long("source_replied_to_id")
     val copyReplyId = long("copy_reply_id")
     val copyRepliedToId = long("copy_replied_to_id")
 
-    fun CodeReplies.getOtherIds(thisIds: List<Long>, isSource: Boolean): List<Long> {
+    fun getOtherIds(thisIds: List<Long>, isSource: Boolean): List<Long> {
         val (thisColumn, otherColumn) = thisAndOtherReplyColumns(isSource)
         return select { thisColumn inList thisIds }
             .map { row -> row[otherColumn] }
     }
 
-    fun CodeReplies.getOtherToThisIdMapping(otherIds: List<Long>, isSource: Boolean): Map<Long, Long> {
+    fun getOtherToThisIdMapping(otherIds: List<Long>, isSource: Boolean): Map<Long, Long> {
         val (thisColumn, otherColumn) = thisAndOtherReplyColumns(isSource)
         return select { otherColumn inList otherIds }
             .associate { row -> row[otherColumn] to row[thisColumn] }
@@ -33,7 +31,7 @@ object CodeReplies : Table() {
         fun insert(thisReply: PullComment, otherReply: PullComment)
     }
 
-    fun CodeReplies.getInserterFor(pairId: Int, isSource: Boolean): Inserter {
+    fun getInserterFor(pairId: Int, isSource: Boolean): Inserter {
         val (thisReplyColumn, otherReplyColumn) = thisAndOtherReplyColumns(isSource)
         val (thisRepliedToColumn, otherRepliedToColumn) = thisAndOtherRepliedToColumns(isSource)
         return Inserter { thisReply, otherReply ->

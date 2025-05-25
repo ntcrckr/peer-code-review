@@ -12,6 +12,9 @@ fun setupDatabase() {
             RepoPairs,
             Users,
             Repos,
+            PullIssueComments,
+            PullCodeComments,
+            PullCodeReplies,
         ).forEach { table ->
             create(table)
             addMissingColumnsStatements(table).forEach { statement -> exec(statement) }

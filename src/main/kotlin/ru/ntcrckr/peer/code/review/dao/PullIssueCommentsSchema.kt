@@ -1,20 +1,19 @@
-package ru.ntcrckr.peer.code.review.dao.old
+package ru.ntcrckr.peer.code.review.dao
 
 import com.jcabi.github.Comment
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
-import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable.Inserter
+import ru.ntcrckr.peer.code.review.dao.PullIssueComments.Inserter
 import ru.ntcrckr.peer.code.review.pair.github.id
 
-object PullCommentsTable : Table() {
-    val id = integer("id").autoIncrement()
-    override val primaryKey = PrimaryKey(id)
-    val repoPairId = integer("repo_pair_id").references(RepoPairTable.id)
+object PullIssueComments : IntIdTable() {
+    val repoPairId = integer("repo_pair_id").references(RepoPairs.id)
     val sourceCommentId = long("source_comment_id")
     val copyCommentId = long("copy_comment_id")
 
-    fun PullCommentsTable.getOtherIds(thisIds: List<Long>, isSource: Boolean): List<Long> {
+    fun getOtherIds(thisIds: List<Long>, isSource: Boolean): List<Long> {
         val (thisColumn, otherColumn) = thisAndOtherColumns(isSource)
         return select { thisColumn inList thisIds }
             .map { row -> row[otherColumn] }
@@ -24,7 +23,7 @@ object PullCommentsTable : Table() {
         fun insert(thisComment: Comment, otherComment: Comment)
     }
 
-    fun PullCommentsTable.getInserterFor(pairId: Int, isSource: Boolean): Inserter {
+    fun getInserterFor(pairId: Int, isSource: Boolean): Inserter {
         val (thisColumn, otherColumn) = thisAndOtherColumns(isSource)
         return Inserter { thisComment, otherComment ->
             insert { table ->
@@ -35,8 +34,9 @@ object PullCommentsTable : Table() {
         }
     }
 
-    private fun thisAndOtherColumns(isSource: Boolean) = when (isSource) {
-        true -> sourceCommentId to copyCommentId
-        false -> copyCommentId to sourceCommentId
-    }
+    private fun thisAndOtherColumns(isSource: Boolean): Pair<Column<Long>, Column<Long>> =
+        when (isSource) {
+            true -> sourceCommentId to copyCommentId
+            false -> copyCommentId to sourceCommentId
+        }
 }

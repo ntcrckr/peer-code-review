@@ -1,17 +1,9 @@
 package ru.ntcrckr.peer.code.review.pair
 
 import com.jcabi.github.*
-import ru.ntcrckr.peer.code.review.dao.old.CodeComments
-import ru.ntcrckr.peer.code.review.dao.old.CodeComments.getInserterFor
-import ru.ntcrckr.peer.code.review.dao.old.CodeComments.getOtherIds
-import ru.ntcrckr.peer.code.review.dao.old.CodeComments.getOtherToThisIdMapping
-import ru.ntcrckr.peer.code.review.dao.old.CodeReplies
-import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.getInserterFor
-import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.getOtherIds
-import ru.ntcrckr.peer.code.review.dao.old.CodeReplies.getOtherToThisIdMapping
-import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable
-import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable.getInserterFor
-import ru.ntcrckr.peer.code.review.dao.old.PullCommentsTable.getOtherIds
+import ru.ntcrckr.peer.code.review.dao.PullCodeComments
+import ru.ntcrckr.peer.code.review.dao.PullCodeReplies
+import ru.ntcrckr.peer.code.review.dao.PullIssueComments
 import ru.ntcrckr.peer.code.review.pair.github.*
 
 abstract class Online(
@@ -30,14 +22,14 @@ abstract class Online(
     val pullCodeComments: List<PullComment.Smart>
         get() = pullRequest.codeComments()
 
-    private val pullCommentInserter: PullCommentsTable.Inserter = PullCommentsTable.getInserterFor(pairId, isSource)
-    private val codeCommentInserter: CodeComments.Inserter = CodeComments.getInserterFor(pairId, isSource)
-    private val codeReplyInserter: CodeReplies.Inserter = CodeReplies.getInserterFor(pairId, isSource)
+    private val pullCommentInserter = PullIssueComments.getInserterFor(pairId, isSource)
+    private val codeCommentInserter = PullCodeComments.getInserterFor(pairId, isSource)
+    private val codeReplyInserter = PullCodeReplies.getInserterFor(pairId, isSource)
 
     fun addPullComments(otherComments: List<Comment.Smart>) {
         val comments = pullRequest.issue().comments()
         val existingThisIds = comments.iterate(pullRequest.createdAt()).map { it.id }
-        val existingOtherIds = PullCommentsTable.getOtherIds(existingThisIds, isSource)
+        val existingOtherIds = PullIssueComments.getOtherIds(existingThisIds, isSource)
         otherComments
             .filter { it.id !in existingOtherIds }
             .forEach { otherComment ->
@@ -55,7 +47,7 @@ abstract class Online(
 
     private fun PullComments.addCodeComments(otherComments: List<PullComment.Smart>) {
         val existingThisIds = iterate(emptyMap()).map { it.smart() }.filter(::isNotReply).map { it.id }
-        val existingOtherIds = CodeComments.getOtherIds(existingThisIds, isSource)
+        val existingOtherIds = PullCodeComments.getOtherIds(existingThisIds, isSource)
         otherComments
             .filter { it.id !in existingOtherIds }
             .forEach { otherComment ->
@@ -66,7 +58,7 @@ abstract class Online(
 
     private fun PullComments.addCodeReplies(otherReplies: List<PullComment.Smart>) {
         val existingThisIds = iterate(emptyMap()).map { it.smart() }.filter(::isReply).map { it.id }
-        val existingOtherIds = CodeReplies.getOtherIds(existingThisIds, isSource)
+        val existingOtherIds = PullCodeReplies.getOtherIds(existingThisIds, isSource)
         val otherToThisIds = getOtherToThisIds(otherReplies)
         otherReplies
             .filter { it.id !in existingOtherIds }
@@ -77,8 +69,8 @@ abstract class Online(
     }
 
     private fun getOtherToThisIds(otherReplies: List<PullComment.Smart>): Map<Long, Long> {
-        val otherToThisCommentIds = CodeComments.getOtherToThisIdMapping(otherReplies.map { it.replyId }, isSource)
-        val otherToThisReplyIds = CodeReplies.getOtherToThisIdMapping(otherReplies.map { it.replyId }, isSource)
+        val otherToThisCommentIds = PullCodeComments.getOtherToThisIdMapping(otherReplies.map { it.replyId }, isSource)
+        val otherToThisReplyIds = PullCodeReplies.getOtherToThisIdMapping(otherReplies.map { it.replyId }, isSource)
         val otherToThisIds = otherToThisCommentIds + otherToThisReplyIds
         return otherToThisIds
     }
