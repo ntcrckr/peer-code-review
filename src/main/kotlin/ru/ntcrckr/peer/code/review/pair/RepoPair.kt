@@ -37,13 +37,21 @@ class RepoPair(
         scheduler.shutdown()
     }
 
-    private fun updateCycle() {
+    private fun updateCycle() = runCatching {
         logger.info("Another update cycle")
         source.local.updateFromOnline()
+        logger.info("Updated local source")
         copy.local.updateFromLocalSource()
+        logger.info("Updated local copy")
         copy.local.updateOnlineCopy()
+        logger.info("Updated online copy")
         copyCommentsFromCopyToSource()
+        logger.info("Copy -> Source")
         copyCommentsFromSourceToCopy()
+        logger.info("Source -> Copy")
+    }.onFailure {
+        logger.info("Exception in update cycle:")
+        it.printStackTrace()
     }
 
     private fun copyCommentsFromCopyToSource() {

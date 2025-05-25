@@ -14,13 +14,11 @@ import ru.ntcrckr.peer.code.review.pair.git.cloneOnlineRepository
 import ru.ntcrckr.peer.code.review.pair.git.path
 import ru.ntcrckr.peer.code.review.pair.github.*
 import ru.ntcrckr.peer.code.review.pair.source.*
-import java.nio.file.Path
 
 data class RepoPairInitRequest(
     val lessonId: Int,
     val sourcePullUrl: String,
     val reviewerUsername: String,
-    val config: Config,
 ) {
     val performerUsername: String
     val sourceRepoName: String
@@ -37,33 +35,31 @@ data class RepoPairInitRequest(
 }
 
 class RepoPairFactory(
-    private val teacher: UserEntity,
-    private val localSourceReposFolder: Path,
-    private val localCopyReposFolder: Path,
-    githubToken: String,
+    private val appSetupEntity: AppSetupEntity,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val github: Github = RtGithub(githubToken)
-    private val credentialsProvider = UsernamePasswordCredentialsProvider(teacher.username, githubToken)
+    private val github: Github = RtGithub(appSetupEntity.githubToken)
+    private val credentialsProvider =
+        UsernamePasswordCredentialsProvider(appSetupEntity.teacherUsername, appSetupEntity.githubToken)
 
-    fun createRepoPair(request: RepoPairInitRequest): RepoPair {
+    suspend fun createRepoPair(request: RepoPairInitRequest): RepoPair {
         val source = constructSource(request)
-        val copy = constructCopy(request, source)
+        val copy = constructCopy(request, source, ConfigEntity(false))
         val repoPairEntity = RepoPairEntity(
-            teacher = teacher,
             performer = UserEntity(request.performerUsername),
             sourceRepo = RepoEntity(request.sourceRepoName, request.sourcePrId),
             sourceLocalRepo = LocalRepoEntity(source.local.repo.path),
             reviewer = UserEntity(request.reviewerUsername),
             copyRepo = RepoEntity(copy.online.repo.coordinates().repo(), copy.online.pullId),
             copyLocalRepo = LocalRepoEntity(copy.local.repo.path),
+            config = ConfigEntity(false),
         )
-        val repoPairId = RepoPairs.insert(request.lessonId, repoPairEntity)
+        val repoPairId = suspendPcrpTransaction { RepoPairs.insert(request.lessonId, repoPairEntity) }
         val bareRepoPair = BareRepoPair(source, copy)
         return bareRepoPair.toFull(repoPairId)
     }
 
-    fun existingRepoPair(repoPairId: Int, config: Config): RepoPair? {
+    fun existingRepoPair(repoPairId: Int): RepoPair? {
         val entity = RepoPairs.get(repoPairId) ?: return null
         val source = Source(
             online = OnlineSource(
@@ -80,9 +76,9 @@ class RepoPairFactory(
             local = LocalCopy(
                 repo = KGit.open(entity.copyLocalRepo.path.toFile()),
                 credentialsProvider = credentialsProvider,
-                config = config,
+                config = entity.config,
             ),
-            online = github.repos()[Coordinates.Simple(entity.teacher.username, entity.copyRepo.name)]
+            online = github.repos()[Coordinates.Simple(appSetupEntity.teacherUsername, entity.copyRepo.name)]
                 .let { repo ->
                     OnlineCopy(
                         pairId = entity.id,
@@ -105,7 +101,7 @@ class RepoPairFactory(
         val localSource = LocalSource(
             repo = cloneOnlineRepository(
                 request.sourceSshUrl,
-                localSourceReposFolder,
+                appSetupEntity.sourceReposFolder,
                 onlineSource,
                 credentialsProvider,
             ),
@@ -115,26 +111,30 @@ class RepoPairFactory(
         return BareSource(onlineSource, localSource)
     }
 
-    private fun constructCopy(request: RepoPairInitRequest, source: BareSource): BareCopy {
+    private fun constructCopy(request: RepoPairInitRequest, source: BareSource, config: ConfigEntity): BareCopy {
         val nameOfCopy = request.sourceRepoName.nameOfCopy("")
         val localCopy = LocalCopy(
             repo = cloneLocalRepository(
                 source.local.repo,
-                localCopyReposFolder,
+                appSetupEntity.copyReposFolder,
                 nameOfCopy,
             ),
             credentialsProvider = credentialsProvider,
-            config = request.config,
+            config = config,
         )
         localCopy.updateFromLocalSource()
-        localCopy.addRemote(Coordinates.Simple(teacher.username, nameOfCopy))
+        localCopy.addRemote(Coordinates.Simple(appSetupEntity.teacherUsername, nameOfCopy))
         localCopy.updateOnlineCopy()
-        val onlineRepo = github.getOnlineRepo(teacher.username, nameOfCopy)
-        val sourcePullRequest = onlineRepo.pulls().get(source.online.pullId).smart()
+        val onlineRepo = github.getOnlineRepo(appSetupEntity.teacherUsername, nameOfCopy)
+        val sourcePullRequest = source.online.repo.pulls().get(source.online.pullId).smart()
         val onlineCopy = BareOnlineCopy(
             repo = onlineRepo,
             pullId = runCatching { onlineRepo.copyPull(sourcePullRequest).number() }
-                .getOrElse { onlineRepo.pulls().firstByTitle(sourcePullRequest.title()).id },
+                .getOrElse {
+                    logger.info("Creating pull request failed, ignoring:")
+                    logger.debug(it.stackTraceToString())
+                    onlineRepo.pulls().firstByTitle(sourcePullRequest.title()).id
+                },
         )
         runCatching { onlineCopy.repo.addCollaborator(request.reviewerUsername) }.getOrElse {
             logger.info("Adding reviewer to online copy failed, ignoring:")

@@ -16,6 +16,7 @@ fun setupDatabase() {
             PullIssueComments,
             PullCodeComments,
             PullCodeReplies,
+            Configs,
         ).forEach { table ->
             create(table)
             addMissingColumnsStatements(table).forEach { statement -> exec(statement) }

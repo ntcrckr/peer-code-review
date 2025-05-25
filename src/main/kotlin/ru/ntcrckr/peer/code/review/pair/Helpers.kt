@@ -11,11 +11,11 @@ const val ANON_USER_NAME = "Some User"
 const val ANON_USER_EMAIL = "some@user.com"
 
 fun String.nameOfCopy(prefix: String = "copyOf"): String =
-    "$prefix${this.replaceFirstChar { it.titlecase(Locale.getDefault()) }}"
+    "$prefix${this.takeIf { prefix != "" }?.replaceFirstChar { it.titlecase(Locale.getDefault()) } ?: this}"
 
 fun sshUrl(userName: String, repositoryName: String): String = "git@github.com:$userName/$repositoryName.git"
 
-private val db = Database.connect("jdbc:h2:./data/pcrp;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
+private val db = Database.connect("jdbc:h2:./data/pcrp_temp;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
 
 fun <T> pcrpTransaction(statement: Transaction.() -> T): T =
     transaction(db, statement = statement)

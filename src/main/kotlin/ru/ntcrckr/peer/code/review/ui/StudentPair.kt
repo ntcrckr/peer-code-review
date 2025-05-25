@@ -22,12 +22,12 @@ data class StudentPair(
     }
 
     companion object {
-        fun RepoPairEntity.toStudentPair(): StudentPair =
+        fun RepoPairEntity.toStudentPair(teacherUsername: String): StudentPair =
             StudentPair(
                 performer = Student.from(performer),
                 reviewer = Student.from(reviewer),
                 sourceUrl = githubPullUrl(performer.username, sourceRepo.name, sourceRepo.pullId),
-                copyUrl = githubPullUrl(teacher.username, copyRepo.name, copyRepo.pullId),
+                copyUrl = githubPullUrl(teacherUsername, copyRepo.name, copyRepo.pullId),
             )
 
         private fun githubPullUrl(username: String, repoName: String, pullId: Int): URI =

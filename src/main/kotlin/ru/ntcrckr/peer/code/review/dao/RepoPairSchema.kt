@@ -3,6 +3,7 @@ package ru.ntcrckr.peer.code.review.dao
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.JoinType.INNER
+import ru.ntcrckr.peer.code.review.dao.Configs.toConfigEntity
 import ru.ntcrckr.peer.code.review.dao.LocalRepos.copyLocalRepo
 import ru.ntcrckr.peer.code.review.dao.LocalRepos.sourceLocalRepo
 import ru.ntcrckr.peer.code.review.dao.LocalRepos.toLocalRepoEntity
@@ -11,36 +12,37 @@ import ru.ntcrckr.peer.code.review.dao.Repos.sourceRepo
 import ru.ntcrckr.peer.code.review.dao.Repos.toRepoEntity
 import ru.ntcrckr.peer.code.review.dao.Users.performer
 import ru.ntcrckr.peer.code.review.dao.Users.reviewer
-import ru.ntcrckr.peer.code.review.dao.Users.teacher
 import ru.ntcrckr.peer.code.review.dao.Users.toUserEntity
 import kotlin.io.path.absolutePathString
 
 data class RepoPairEntity(
     val id: Int = -1,
-    val teacher: UserEntity,
     val performer: UserEntity,
     val sourceRepo: RepoEntity,
     val sourceLocalRepo: LocalRepoEntity,
     val reviewer: UserEntity,
     val copyRepo: RepoEntity,
     val copyLocalRepo: LocalRepoEntity,
+    val config: ConfigEntity,
 )
 
 object RepoPairs : IntIdTable() {
     val lessonId = integer("lesson_id").references(Lessons.id)
-    val teacherId = integer("teacher_id").references(Users.id)
     val performerId = integer("performer_id").references(Users.id)
     val sourceRepoId = integer("source_repo_id").references(Repos.id)
     val sourceLocalRepoId = integer("source_local_repo_id").references(LocalRepos.id)
     val reviewerId = integer("reviewer_id").references(Users.id)
     val copyRepoId = integer("copy_repo_id").references(Repos.id)
     val copyLocalRepoId = integer("copy_local_repo_id").references(LocalRepos.id)
+    val configId = integer("config_id").references(Configs.id)
+
+    fun getAll(): List<RepoPairEntity> = withJoins
+        .selectAll()
+        .map { it.toRepoPairEntity() }
 
     fun getAllForLesson(lessonId: Int): List<RepoPairEntity> = withJoins
         .select { RepoPairs.lessonId eq lessonId }
-        .map {
-            it.toRepoPairEntity()
-        }
+        .map { it.toRepoPairEntity() }
 
     fun get(repoPairId: Int): RepoPairEntity? = withJoins
         .select { RepoPairs.id eq repoPairId }
@@ -56,7 +58,6 @@ object RepoPairs : IntIdTable() {
             AndOp(
                 listOf(
                     RepoPairs.lessonId eq lessonId,
-                    teacher[Users.username] eq entity.teacher.username,
                     performer[Users.username] eq entity.performer.username,
                     sourceRepo[Repos.name] eq entity.sourceRepo.name,
                     sourceRepo[Repos.pullId] eq entity.sourceRepo.pullId,
@@ -74,34 +75,34 @@ object RepoPairs : IntIdTable() {
 
     fun insert(lessonId: Int, entity: RepoPairEntity): Int = insert {
         it[RepoPairs.lessonId] = lessonId
-        it[teacherId] = Users.getIdOrInsert(entity.teacher)
         it[performerId] = Users.getIdOrInsert(entity.performer)
         it[sourceRepoId] = Repos.getIdOrInsert(entity.sourceRepo)
         it[sourceLocalRepoId] = LocalRepos.getIdOrInsert(entity.sourceLocalRepo)
-        it[performerId] = Users.getIdOrInsert(entity.reviewer)
+        it[reviewerId] = Users.getIdOrInsert(entity.reviewer)
         it[copyRepoId] = Repos.getIdOrInsert(entity.copyRepo)
         it[copyLocalRepoId] = LocalRepos.getIdOrInsert(entity.copyLocalRepo)
+        it[configId] = Configs.insert(entity.config)
     }[id].value
 
     fun getIdOrInsert(lessonId: Int, entity: RepoPairEntity): Int = getId(lessonId, entity) ?: insert(lessonId, entity)
 
     private val RepoPairs.withJoins: Join
-        get() = join(teacher, INNER, teacherId, teacher[Users.id])
-            .join(performer, INNER, performerId, performer[Users.id])
+        get() = join(performer, INNER, performerId, performer[Users.id])
             .join(sourceRepo, INNER, sourceRepoId, sourceRepo[Repos.id])
             .join(sourceLocalRepo, INNER, sourceLocalRepoId, sourceLocalRepo[LocalRepos.id])
             .join(reviewer, INNER, reviewerId, reviewer[Users.id])
             .join(copyRepo, INNER, copyRepoId, copyRepo[Repos.id])
             .join(copyLocalRepo, INNER, copyLocalRepoId, copyLocalRepo[LocalRepos.id])
+            .join(Configs, INNER, configId, Configs.id)
 
     private fun ResultRow.toRepoPairEntity() = RepoPairEntity(
         id = this[id].value,
-        teacher = toUserEntity(teacher),
         performer = toUserEntity(performer),
         sourceRepo = toRepoEntity(sourceRepo),
         sourceLocalRepo = toLocalRepoEntity(sourceLocalRepo),
         reviewer = toUserEntity(reviewer),
         copyRepo = toRepoEntity(copyRepo),
         copyLocalRepo = toLocalRepoEntity(copyLocalRepo),
+        config = toConfigEntity(),
     )
 }

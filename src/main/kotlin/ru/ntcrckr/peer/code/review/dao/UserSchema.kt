@@ -10,11 +10,8 @@ data class UserEntity(
 object Users : IntIdTable() {
     val username = varchar("username", 50)
 
-    val teacher = Users.alias("teacher")
     val performer = Users.alias("performer")
     val reviewer = Users.alias("reviewer")
-
-    fun getTeacher(): UserEntity? = get(1)
 
     fun get(userId: Int): UserEntity? = select { id eq userId }
         .limit(1)

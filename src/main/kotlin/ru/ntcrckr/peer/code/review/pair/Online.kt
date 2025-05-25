@@ -1,6 +1,7 @@
 package ru.ntcrckr.peer.code.review.pair
 
 import com.jcabi.github.*
+import org.slf4j.LoggerFactory
 import ru.ntcrckr.peer.code.review.dao.PullCodeComments
 import ru.ntcrckr.peer.code.review.dao.PullCodeReplies
 import ru.ntcrckr.peer.code.review.dao.PullIssueComments
@@ -11,6 +12,8 @@ abstract class Online(
     pairId: Int,
     private val pullId: Int,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     abstract val repo: Repo
 
     val pullRequest: Pull.Smart
@@ -32,6 +35,7 @@ abstract class Online(
         val existingOtherIds = PullIssueComments.getOtherIds(existingThisIds, isSource)
         otherComments
             .filter { it.id !in existingOtherIds }
+            .also { logger.info("Adding ${it.size} pull comments") }
             .forEach { otherComment ->
                 val thisComment = comments.post(otherComment.body())
                 pullCommentInserter.insert(thisComment, otherComment)
@@ -50,6 +54,7 @@ abstract class Online(
         val existingOtherIds = PullCodeComments.getOtherIds(existingThisIds, isSource)
         otherComments
             .filter { it.id !in existingOtherIds }
+            .also { logger.info("Adding ${it.size} code comments") }
             .forEach { otherComment ->
                 val thisComment = addCopyOf(otherComment)
                 codeCommentInserter.insert(thisComment, otherComment)
@@ -62,6 +67,7 @@ abstract class Online(
         val otherToThisIds = getOtherToThisIds(otherReplies)
         otherReplies
             .filter { it.id !in existingOtherIds }
+            .also { logger.info("Adding ${it.size} code replies") }
             .forEach { otherReply ->
                 val thisReply = reply(otherReply.body(), otherToThisIds[otherReply.replyId]!!.toInt())
                 codeReplyInserter.insert(thisReply, otherReply)

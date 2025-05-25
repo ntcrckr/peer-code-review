@@ -11,7 +11,7 @@ data class LocalRepoEntity(
 )
 
 object LocalRepos : IntIdTable() {
-    val path = varchar("path", 100)
+    val path = varchar("path", 500)
 
     val sourceLocalRepo = LocalRepos.alias("source_local_repo")
     val copyLocalRepo = LocalRepos.alias("copy_local_repo")
