@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +42,8 @@ fun StudentPairsTable(selectedLesson: LessonEntity?) = Column(modifier = Modifie
             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                 Text(userPair.performer.username, modifier = Modifier.weight(2f))
                 Text(userPair.reviewer.username, modifier = Modifier.weight(2f))
-                RepositoryLinkText(userPair.sourceUrl, modifier = Modifier.weight(4f))
-                RepositoryLinkText(userPair.copyUrl, modifier = Modifier.weight(4f))
+                LinkText(userPair.sourceUrl, userPair.sourceUrl.path, modifier = Modifier.weight(4f))
+                LinkText(userPair.copyUrl, userPair.sourceUrl.path, modifier = Modifier.weight(4f))
             }
             Divider()
         }
@@ -52,6 +54,7 @@ fun StudentPairsTable(selectedLesson: LessonEntity?) = Column(modifier = Modifie
 private fun TableTitle() = Row(verticalAlignment = Alignment.CenterVertically) {
     Text("Проверки в этом классе", style = MaterialTheme.typography.h6)
     AddEntityPopupButton(
+        icon = Icons.Filled.Add,
         title = "Новая проверка",
         fields = listOf(
             TextField(

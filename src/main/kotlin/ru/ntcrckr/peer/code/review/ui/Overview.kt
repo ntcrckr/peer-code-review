@@ -4,14 +4,14 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ru.ntcrckr.peer.code.review.dao.ClassEntity
-import ru.ntcrckr.peer.code.review.dao.Classes
-import ru.ntcrckr.peer.code.review.dao.LessonEntity
-import ru.ntcrckr.peer.code.review.dao.Lessons
+import ru.ntcrckr.peer.code.review.dao.*
 import ru.ntcrckr.peer.code.review.pair.pcrpTransaction
 import ru.ntcrckr.peer.code.review.pair.suspendPcrpTransaction
 
@@ -20,6 +20,8 @@ import ru.ntcrckr.peer.code.review.pair.suspendPcrpTransaction
 fun Overview() = Column(modifier = Modifier.padding(16.dp)) {
     var selectedLesson by remember { mutableStateOf<LessonEntity?>(null) }
 
+    Header()
+    Spacer(Modifier.height(8.dp))
     Text("Обзор проверок", style = MaterialTheme.typography.h5)
     Spacer(Modifier.height(16.dp))
     Navigation(
@@ -28,6 +30,42 @@ fun Overview() = Column(modifier = Modifier.padding(16.dp)) {
     )
     Spacer(Modifier.height(8.dp))
     StudentPairsTable(selectedLesson)
+}
+
+@Composable
+private fun Header() = Row(
+    modifier = Modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.SpaceEvenly,
+) {
+    var appSetup by remember { mutableStateOf(pcrpTransaction { AppSetup.get()!! }) }
+    var setupUpdatedTrigger by remember { mutableStateOf(false) }
+    LaunchedEffect(setupUpdatedTrigger) {
+        appSetup = pcrpTransaction { AppSetup.get()!! }
+        setupUpdatedTrigger = false
+    }
+
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Пользователь GitHub:")
+        LinkText(appSetup.userUrl)
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Папка с исходными репозиториями:")
+        PathLinkText(appSetup.sourceReposFolder, appSetup.sourceReposFolder.fileName.toString())
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Папка с копиями репозиториев:")
+        PathLinkText(appSetup.copyReposFolder, appSetup.copyReposFolder.fileName.toString())
+    }
+    AddEntityPopupButton(
+        icon = Icons.Filled.Edit,
+        title = "Обновление настроек приложения",
+        fields = setupFields,
+        onAdd = { (teacherUsername, githubToken, sourceReposFolder, copyReposFolder) ->
+            updateSetup(listOf(teacherUsername, githubToken, sourceReposFolder, copyReposFolder))
+            setupUpdatedTrigger = true
+        },
+    )
 }
 
 @Composable
@@ -47,6 +85,7 @@ private fun Navigation(
         defaultText = "Группы отсутствуют",
     )
     AddEntityPopupButton(
+        icon = Icons.Filled.Add,
         title = "Добавление новой группы",
         fields = listOf(
             TextField(
@@ -74,6 +113,7 @@ private fun Navigation(
         defaultText = "Занятия отсутствуют",
     )
     AddEntityPopupButton(
+        icon = Icons.Filled.Add,
         title = "Добавление нового занятия",
         fields = listOf(
             TextField(

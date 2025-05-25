@@ -4,19 +4,14 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.colors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color.Companion.Red
-import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import androidx.compose.ui.window.rememberWindowState
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 data class TextField(
     val label: String,
@@ -27,13 +22,14 @@ data class TextField(
 @Composable
 @Preview
 fun AddEntityPopupButton(
+    icon: ImageVector,
     title: String,
     fields: List<TextField>,
     onAdd: (List<String>) -> Unit,
 ) {
     var showPopup by remember { mutableStateOf(false) }
     IconButton(onClick = { showPopup = true }) {
-        Icon(Icons.Filled.Add, contentDescription = title)
+        Icon(icon, contentDescription = title)
     }
     AddEntityPopup(
         title = title,
