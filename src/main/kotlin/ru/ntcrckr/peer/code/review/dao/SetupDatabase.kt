@@ -7,6 +7,7 @@ import ru.ntcrckr.peer.code.review.pair.pcrpTransaction
 fun setupDatabase() {
     pcrpTransaction {
         listOf(
+            AppSetup,
             Classes,
             Lessons,
             RepoPairs,

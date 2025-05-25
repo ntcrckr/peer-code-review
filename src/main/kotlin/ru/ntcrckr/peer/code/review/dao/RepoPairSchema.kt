@@ -1,6 +1,5 @@
 package ru.ntcrckr.peer.code.review.dao
 
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.JoinType.INNER
@@ -14,8 +13,6 @@ import ru.ntcrckr.peer.code.review.dao.Users.performer
 import ru.ntcrckr.peer.code.review.dao.Users.reviewer
 import ru.ntcrckr.peer.code.review.dao.Users.teacher
 import ru.ntcrckr.peer.code.review.dao.Users.toUserEntity
-import ru.ntcrckr.peer.code.review.pair.getGitHubToken
-import ru.ntcrckr.peer.code.review.pair.sshUrl
 import kotlin.io.path.absolutePathString
 
 data class RepoPairEntity(
@@ -27,10 +24,7 @@ data class RepoPairEntity(
     val reviewer: UserEntity,
     val copyRepo: RepoEntity,
     val copyLocalRepo: LocalRepoEntity,
-) {
-    val credentialsProvider = UsernamePasswordCredentialsProvider(teacher.username, getGitHubToken())
-    val sourceSshUrl: String = sshUrl(performer.username, sourceRepo.name)
-}
+)
 
 object RepoPairs : IntIdTable() {
     val lessonId = integer("lesson_id").references(Lessons.id)
@@ -95,8 +89,10 @@ object RepoPairs : IntIdTable() {
         get() = join(teacher, INNER, teacherId, teacher[Users.id])
             .join(performer, INNER, performerId, performer[Users.id])
             .join(sourceRepo, INNER, sourceRepoId, sourceRepo[Repos.id])
+            .join(sourceLocalRepo, INNER, sourceLocalRepoId, sourceLocalRepo[LocalRepos.id])
             .join(reviewer, INNER, reviewerId, reviewer[Users.id])
             .join(copyRepo, INNER, copyRepoId, copyRepo[Repos.id])
+            .join(copyLocalRepo, INNER, copyLocalRepoId, copyLocalRepo[LocalRepos.id])
 
     private fun ResultRow.toRepoPairEntity() = RepoPairEntity(
         id = this[id].value,
