@@ -1,50 +1,21 @@
 package ru.ntcrckr.peer.code.review.pair
 
-import com.jcabi.github.Github
-import com.jcabi.github.RtGithub
 import org.slf4j.LoggerFactory
-import ru.ntcrckr.peer.code.review.dao.RepoEntity
-import ru.ntcrckr.peer.code.review.dao.RepoPairEntity
-import ru.ntcrckr.peer.code.review.dao.RepoPairs
-import ru.ntcrckr.peer.code.review.dao.UserEntity
+import ru.ntcrckr.peer.code.review.pair.copy.BareCopy
 import ru.ntcrckr.peer.code.review.pair.copy.Copy
+import ru.ntcrckr.peer.code.review.pair.source.BareSource
 import ru.ntcrckr.peer.code.review.pair.source.Source
-import ru.ntcrckr.peer.code.review.pair.users.Performer
-import ru.ntcrckr.peer.code.review.pair.users.Reviewer
-import ru.ntcrckr.peer.code.review.pair.users.Teacher
-import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
 import java.util.concurrent.TimeUnit
 
 class RepoPair(
-    performer: Performer,
-    teacher: Teacher,
-    reviewer: Reviewer,
-    localSourcePath: Path,
-    localCopyPath: Path,
-    config: Config,
+    private val source: Source,
+    private val copy: Copy,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val scheduler = Executors.newScheduledThreadPool(1)
-    private val github: Github = RtGithub(teacher.githubToken)
-
-    private val pairId: Int = pcrpTransaction {
-        RepoPairs.getIdOrInsert(
-            -1,
-            RepoPairEntity(
-                teacher = UserEntity(teacher.username),
-                performer = UserEntity(performer.username),
-                sourceRepo = RepoEntity(performer.repoName, performer.pullId),
-                reviewer = UserEntity(reviewer.username),
-                copyRepo = TODO(),
-            )
-        )
-    }
-
-    val source = Source.init(pairId, github, performer, teacher.credentialsProvider, localSourcePath)
-    val copy = Copy(pairId, github, performer.repoName.nameOfCopy(), teacher, reviewer, source, localCopyPath, config)
 
     fun startUpdateCycle(delay: Duration = Duration.ofMinutes(1L)) {
         runCatching {
@@ -92,4 +63,15 @@ class RepoPair(
             source.online.addCodeComments(allCodeComments)
         }
     }
+}
+
+class BareRepoPair(
+    val source: BareSource,
+    val copy: BareCopy,
+) {
+    fun toFull(repoPairId: Int): RepoPair =
+        RepoPair(
+            source = source.toFull(repoPairId),
+            copy = copy.toFull(repoPairId),
+        )
 }

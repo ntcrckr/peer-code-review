@@ -30,5 +30,3 @@ fun KGit.addAndCommit(
     add { addFilepattern(".") }
     commit { this.message = message }
 }
-
-fun getGitHubToken(): String = System.getenv("GITHUB_TOKEN")

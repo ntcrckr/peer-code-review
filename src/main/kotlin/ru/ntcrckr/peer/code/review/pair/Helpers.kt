@@ -22,3 +22,12 @@ fun <T> pcrpTransaction(statement: Transaction.() -> T): T =
 
 suspend fun <T> suspendPcrpTransaction(statement: suspend Transaction.() -> T): T =
     newSuspendedTransaction(Dispatchers.IO, db, statement = statement)
+
+fun getGitHubToken(): String = System.getenv("GITHUB_TOKEN")
+
+fun String.parseGitHubPrUrl(): Triple<String, String, Int> {
+    val regex = Regex("""^https://github\.com/([^/]+)/([^/]+)/pull/(\d+)$""")
+    val matchResult = regex.matchEntire(this) ?: TODO()
+    val (username, repo, prNumberStr) = matchResult.destructured
+    return Triple(username, repo, prNumberStr.toInt())
+}

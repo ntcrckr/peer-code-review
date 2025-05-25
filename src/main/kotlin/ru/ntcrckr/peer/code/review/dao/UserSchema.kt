@@ -14,6 +14,13 @@ object Users : IntIdTable() {
     val performer = Users.alias("performer")
     val reviewer = Users.alias("reviewer")
 
+    fun getTeacher(): UserEntity? = get(1)
+
+    fun get(userId: Int): UserEntity? = select { id eq userId }
+        .limit(1)
+        .singleOrNull()
+        ?.let { UserEntity(it[username]) }
+
     fun ResultRow.toUserEntity(alias: Alias<Users>): UserEntity =
         UserEntity(this[alias[username]])
 

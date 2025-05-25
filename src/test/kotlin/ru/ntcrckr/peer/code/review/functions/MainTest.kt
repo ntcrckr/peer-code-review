@@ -5,9 +5,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import ru.ntcrckr.peer.code.review.pair.Config
 import ru.ntcrckr.peer.code.review.pair.RepoPair
-import ru.ntcrckr.peer.code.review.pair.users.Performer
-import ru.ntcrckr.peer.code.review.pair.users.Reviewer
-import ru.ntcrckr.peer.code.review.pair.users.Teacher
+import ru.ntcrckr.peer.code.review.pair.getGitHubToken
 import java.time.Duration
 import kotlin.time.toKotlinDuration
 

@@ -1,28 +1,33 @@
 package ru.ntcrckr.peer.code.review.pair.source
 
 import com.jcabi.github.Coordinates
-import com.jcabi.github.Github
 import com.jcabi.github.Repo
 import ru.ntcrckr.peer.code.review.pair.Online
-import ru.ntcrckr.peer.code.review.pair.users.Performer
 
 class OnlineSource(
     pairId: Int,
     override val repo: Repo,
-    pullId: Int,
-) : Online(isSource = true, pairId, pullId) {
-    val coordinates: Coordinates = repo.coordinates()
+    override val pullId: Int,
+) : Online(isSource = true, pairId, pullId), IOnlineSource {
+    override val coordinates: Coordinates = repo.coordinates()
+}
 
-    companion object {
-        fun from(
-            pairId: Int,
-            gitHub: Github,
-            performer: Performer,
-        ): OnlineSource =
-            OnlineSource(
-                pairId = pairId,
-                repo = gitHub.repos()[Coordinates.Simple(performer.username, performer.repoName)],
-                pullId = performer.pullId,
-            )
-    }
+class BareOnlineSource(
+    override val repo: Repo,
+    override val pullId: Int,
+) : IOnlineSource {
+    override val coordinates: Coordinates = repo.coordinates()
+
+    fun toFull(repoPairId: Int): OnlineSource =
+        OnlineSource(
+            pairId = repoPairId,
+            repo = repo,
+            pullId = pullId,
+        )
+}
+
+interface IOnlineSource {
+    val repo: Repo
+    val coordinates: Coordinates
+    val pullId: Int
 }
