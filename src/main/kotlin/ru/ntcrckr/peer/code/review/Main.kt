@@ -21,7 +21,7 @@ fun main() = application {
         state = rememberWindowState(
             placement = WindowPlacement.Floating,
             position = WindowPosition(Alignment.Center),
-            size = DpSize(1280.dp, 720.dp),
+            size = DpSize(960.dp, 540.dp),
         ),
         onCloseRequest = ::exitApplication,
     ) {

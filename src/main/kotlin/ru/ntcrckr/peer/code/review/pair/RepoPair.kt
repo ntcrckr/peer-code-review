@@ -64,11 +64,11 @@ class RepoPair(
     }
 
     private fun copyCommentsFromSourceToCopy() {
-        val pullComments = copy.online.pullComments
-        val allCodeComments = copy.online.pullCodeComments
+        val pullComments = source.online.pullComments
+        val allCodeComments = source.online.pullCodeComments
         pcrpTransaction {
-            source.online.addPullComments(pullComments)
-            source.online.addCodeComments(allCodeComments)
+            copy.online.addPullComments(pullComments)
+            copy.online.addCodeComments(allCodeComments)
         }
     }
 }
