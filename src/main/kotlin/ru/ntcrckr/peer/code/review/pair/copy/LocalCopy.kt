@@ -8,6 +8,8 @@ import ru.ntcrckr.peer.code.review.pair.ANON_USER_EMAIL
 import ru.ntcrckr.peer.code.review.pair.ANON_USER_NAME
 import ru.ntcrckr.peer.code.review.pair.git.*
 
+typealias SourceToCopyCommitHashes = List<Pair<String, String>>
+
 class LocalCopy(
     val repo: KGit,
     private val credentialsProvider: CredentialsProvider,
@@ -15,11 +17,28 @@ class LocalCopy(
     private val localRemoteName: String = DEFAULT_SOURCE_LOCAL_REMOTE_NAME,
     private val onlineRemoteName: String = DEFAULT_COPY_ONLINE_REMOTE_NAME,
 ) {
-    fun updateFromLocalSource() {
+    fun updateFromLocalSource(): SourceToCopyCommitHashes {
         repo.copyFromRemote(localRemoteName)
         repo.checkoutAllRemoteBranches(localRemoteName)
-        if (config.anonymizeCommitInfo)
-            repo.anonymizeCommitInfo(ANON_USER_NAME, ANON_USER_EMAIL)
+        if (config.anonymizeCommitInfo) {
+            val newCommits = repo.getCommits()
+                .filter { commit ->
+                    commit.authorIdent.let { it.name != ANON_USER_NAME && it.emailAddress != ANON_USER_EMAIL }
+                }
+            repo.anonymizeCommitInfo()
+            val newCommitsTimes = newCommits.map { it.commitTime }
+            val anonymizedNewCommits = repo.getCommits()
+                .filter { commit ->
+                    commit.commitTime in newCommitsTimes
+                }
+                .associateBy { it.commitTime }
+            return newCommits
+                .mapNotNull {
+                    val anonymizedCommit = anonymizedNewCommits[it.commitTime] ?: return@mapNotNull null
+                    it.name to anonymizedCommit.name
+                }
+        }
+        return emptyList()
     }
 
     fun addRemote(coordinates: Coordinates) = repo.addOnlineRemote(coordinates, onlineRemoteName)

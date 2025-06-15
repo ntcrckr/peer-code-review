@@ -2,6 +2,7 @@ package ru.ntcrckr.peer.code.review.dao
 
 import com.jcabi.github.PullComment
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import ru.ntcrckr.peer.code.review.dao.PullCodeReplies.Inserter
@@ -9,7 +10,7 @@ import ru.ntcrckr.peer.code.review.pair.github.id
 import ru.ntcrckr.peer.code.review.pair.github.replyId
 
 object PullCodeReplies : IntIdTable() {
-    val repoPairId = integer("repo_pair_id").references(RepoPairs.id)
+    val repoPairId = integer("repo_pair_id").references(RepoPairs.id, onDelete = CASCADE)
     val sourceReplyId = long("source_reply_id")
     val sourceRepliedToId = long("source_replied_to_id")
     val copyReplyId = long("copy_reply_id")

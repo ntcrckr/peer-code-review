@@ -3,6 +3,7 @@ package ru.ntcrckr.peer.code.review.dao
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.JoinType.INNER
+import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import ru.ntcrckr.peer.code.review.dao.Configs.toConfigEntity
 import ru.ntcrckr.peer.code.review.dao.LocalRepos.copyLocalRepo
 import ru.ntcrckr.peer.code.review.dao.LocalRepos.sourceLocalRepo
@@ -28,13 +29,13 @@ data class RepoPairEntity(
 
 object RepoPairs : IntIdTable() {
     val lessonId = integer("lesson_id").references(Lessons.id)
-    val performerId = integer("performer_id").references(Users.id)
-    val sourceRepoId = integer("source_repo_id").references(Repos.id)
-    val sourceLocalRepoId = integer("source_local_repo_id").references(LocalRepos.id)
-    val reviewerId = integer("reviewer_id").references(Users.id)
-    val copyRepoId = integer("copy_repo_id").references(Repos.id)
-    val copyLocalRepoId = integer("copy_local_repo_id").references(LocalRepos.id)
-    val configId = integer("config_id").references(Configs.id)
+    val performerId = integer("performer_id").references(Users.id, onDelete = CASCADE)
+    val sourceRepoId = integer("source_repo_id").references(Repos.id, onDelete = CASCADE)
+    val sourceLocalRepoId = integer("source_local_repo_id").references(LocalRepos.id, onDelete = CASCADE)
+    val reviewerId = integer("reviewer_id").references(Users.id, onDelete = CASCADE)
+    val copyRepoId = integer("copy_repo_id").references(Repos.id, onDelete = CASCADE)
+    val copyLocalRepoId = integer("copy_local_repo_id").references(LocalRepos.id, onDelete = CASCADE)
+    val configId = integer("config_id").references(Configs.id, onDelete = CASCADE)
 
     fun getAll(): List<RepoPairEntity> = withJoins
         .selectAll()
@@ -83,8 +84,6 @@ object RepoPairs : IntIdTable() {
         it[copyLocalRepoId] = LocalRepos.getIdOrInsert(entity.copyLocalRepo)
         it[configId] = Configs.insert(entity.config)
     }[id].value
-
-    fun getIdOrInsert(lessonId: Int, entity: RepoPairEntity): Int = getId(lessonId, entity) ?: insert(lessonId, entity)
 
     private val RepoPairs.withJoins: Join
         get() = join(performer, INNER, performerId, performer[Users.id])

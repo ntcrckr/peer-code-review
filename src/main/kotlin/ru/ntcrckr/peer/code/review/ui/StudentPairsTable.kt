@@ -58,7 +58,11 @@ fun StudentPairsTable(
             Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
                 Text(userPair.performer.username, modifier = Modifier.weight(2f))
                 Text(userPair.reviewer.username, modifier = Modifier.weight(2f))
-                LinkText(userPair.sourceUrl, userPair.sourceUrl.path.substringAfter("/"), modifier = Modifier.weight(4f))
+                LinkText(
+                    userPair.sourceUrl,
+                    userPair.sourceUrl.path.substringAfter("/"),
+                    modifier = Modifier.weight(4f)
+                )
                 LinkText(userPair.copyUrl, userPair.sourceUrl.path.substringAfter("/"), modifier = Modifier.weight(4f))
             }
             Divider()

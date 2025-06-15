@@ -2,6 +2,7 @@ package ru.ntcrckr.peer.code.review.pair
 
 import com.jcabi.github.*
 import org.slf4j.LoggerFactory
+import ru.ntcrckr.peer.code.review.dao.Commits
 import ru.ntcrckr.peer.code.review.dao.PullCodeComments
 import ru.ntcrckr.peer.code.review.dao.PullCodeReplies
 import ru.ntcrckr.peer.code.review.dao.PullIssueComments
@@ -25,9 +26,9 @@ abstract class Online(
     val pullCodeComments: List<PullComment.Smart>
         get() = pullRequest.codeComments()
 
-    private val pullCommentInserter = PullIssueComments.getInserterFor(pairId, isSource)
-    private val codeCommentInserter = PullCodeComments.getInserterFor(pairId, isSource)
-    private val codeReplyInserter = PullCodeReplies.getInserterFor(pairId, isSource)
+    private val pullCommentInserter: PullIssueComments.Inserter = PullIssueComments.getInserterFor(pairId, isSource)
+    private val codeCommentInserter: PullCodeComments.Inserter = PullCodeComments.getInserterFor(pairId, isSource)
+    private val codeReplyInserter: PullCodeReplies.Inserter = PullCodeReplies.getInserterFor(pairId, isSource)
 
     fun addPullComments(otherComments: List<Comment.Smart>) {
         val comments = pullRequest.issue().comments()
@@ -56,7 +57,12 @@ abstract class Online(
             .filter { it.id !in existingOtherIds }
             .also { logger.info("Adding ${it.size} code comments") }
             .forEach { otherComment ->
-                val thisComment = addCopyOf(otherComment)
+                val thisComment = post(
+                    /* body = */ otherComment.body(),
+                    /* commit = */ Commits.getOtherId(otherComment.commitId(), !isSource),
+                    /* path = */ otherComment.json().getString("path"),
+                    /* position = */ otherComment.json().getJsonNumber("position").longValue(),
+                )
                 codeCommentInserter.insert(thisComment, otherComment)
             }
     }
@@ -69,7 +75,10 @@ abstract class Online(
             .filter { it.id !in existingOtherIds }
             .also { logger.info("Adding ${it.size} code replies") }
             .forEach { otherReply ->
-                val thisReply = reply(otherReply.body(), otherToThisIds[otherReply.replyId]!!.toInt())
+                val thisReply = reply(
+                    /* body = */ otherReply.body(),
+                    /* comment = */ otherToThisIds[otherReply.replyId]!!.toLong()
+                )
                 codeReplyInserter.insert(thisReply, otherReply)
             }
     }

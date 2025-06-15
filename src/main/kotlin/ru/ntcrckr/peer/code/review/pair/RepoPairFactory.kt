@@ -44,7 +44,7 @@ class RepoPairFactory(
 
     suspend fun createRepoPair(request: RepoPairInitRequest): RepoPair {
         val source = constructSource(request)
-        val copy = constructCopy(request, source, ConfigEntity(false))
+        val (copy, commitHashes) = constructCopy(request, source, ConfigEntity(true))
         val repoPairEntity = RepoPairEntity(
             performer = UserEntity(request.performerUsername),
             sourceRepo = RepoEntity(request.sourceRepoName, request.sourcePrId),
@@ -52,11 +52,18 @@ class RepoPairFactory(
             reviewer = UserEntity(request.reviewerUsername),
             copyRepo = RepoEntity(copy.online.repo.coordinates().repo(), copy.online.pullId),
             copyLocalRepo = LocalRepoEntity(copy.local.repo.path),
-            config = ConfigEntity(false),
+            config = ConfigEntity(true),
         )
         val repoPairId = suspendPcrpTransaction { RepoPairs.insert(request.lessonId, repoPairEntity) }
         val bareRepoPair = BareRepoPair(source, copy)
-        return bareRepoPair.toFull(repoPairId)
+        val repoPair = bareRepoPair.toFull(repoPairId)
+        val commitInserter = Commits.getInserter(repoPairId)
+        if (commitHashes.isNotEmpty()) pcrpTransaction {
+            commitHashes.forEach { (sourceCommitHash, copyCommitHash) ->
+                commitInserter.insert(sourceCommitHash, copyCommitHash)
+            }
+        }
+        return repoPair
     }
 
     fun existingRepoPair(repoPairId: Int): RepoPair? {
@@ -88,6 +95,7 @@ class RepoPairFactory(
                 },
         )
         return RepoPair(
+            pairId = repoPairId,
             source = source,
             copy = copy,
         )
@@ -111,7 +119,11 @@ class RepoPairFactory(
         return BareSource(onlineSource, localSource)
     }
 
-    private fun constructCopy(request: RepoPairInitRequest, source: BareSource, config: ConfigEntity): BareCopy {
+    private fun constructCopy(
+        request: RepoPairInitRequest,
+        source: BareSource,
+        config: ConfigEntity,
+    ): Pair<BareCopy, SourceToCopyCommitHashes> {
         val nameOfCopy = request.sourceRepoName.nameOfCopy("")
         val localCopy = LocalCopy(
             repo = cloneLocalRepository(
@@ -122,10 +134,10 @@ class RepoPairFactory(
             credentialsProvider = credentialsProvider,
             config = config,
         )
-        localCopy.updateFromLocalSource()
+        val commitHashes = localCopy.updateFromLocalSource()
         localCopy.addRemote(Coordinates.Simple(appSetupEntity.teacherUsername, nameOfCopy))
-        localCopy.updateOnlineCopy()
         val onlineRepo = github.getOnlineRepo(appSetupEntity.teacherUsername, nameOfCopy)
+        localCopy.updateOnlineCopy()
         val sourcePullRequest = source.online.repo.pulls().get(source.online.pullId).smart()
         val onlineCopy = BareOnlineCopy(
             repo = onlineRepo,
@@ -140,7 +152,7 @@ class RepoPairFactory(
             logger.info("Adding reviewer to online copy failed, ignoring:")
             logger.debug(it.stackTraceToString())
         }
-        return BareCopy(localCopy, onlineCopy)
+        return BareCopy(localCopy, onlineCopy) to commitHashes
     }
 
     private fun Github.getOnlineRepo(username: String, repoName: String): Repo =
