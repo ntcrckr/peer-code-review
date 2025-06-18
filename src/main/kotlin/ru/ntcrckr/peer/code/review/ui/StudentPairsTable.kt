@@ -61,9 +61,13 @@ fun StudentPairsTable(
                 LinkText(
                     userPair.sourceUrl,
                     userPair.sourceUrl.path.substringAfter("/"),
-                    modifier = Modifier.weight(4f)
+                    modifier = Modifier.weight(4f),
                 )
-                LinkText(userPair.copyUrl, userPair.sourceUrl.path.substringAfter("/"), modifier = Modifier.weight(4f))
+                LinkText(
+                    userPair.copyUrl,
+                    userPair.copyUrl.path.substringAfter("/"),
+                    modifier = Modifier.weight(4f),
+                )
             }
             Divider()
         }
