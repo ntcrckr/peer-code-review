@@ -13,6 +13,7 @@ fun setupDatabase() {
             RepoPairs,
             Users,
             Repos,
+            Commits,
             PullIssueComments,
             PullCodeComments,
             PullCodeReplies,

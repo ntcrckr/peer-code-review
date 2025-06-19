@@ -7,16 +7,14 @@ import ru.ntcrckr.peer.code.review.pair.Online
 class OnlineSource(
     pairId: Int,
     override val repo: Repo,
-    override val pullId: Int,
-) : Online(isSource = true, pairId, pullId), IOnlineSource {
-    override val coordinates: Coordinates = repo.coordinates()
-}
+    val pullId: Int,
+) : Online(isSource = true, pairId, pullId)
 
 class BareOnlineSource(
-    override val repo: Repo,
-    override val pullId: Int,
-) : IOnlineSource {
-    override val coordinates: Coordinates = repo.coordinates()
+    val repo: Repo,
+    val pullId: Int,
+) {
+    val coordinates: Coordinates = repo.coordinates()
 
     fun toFull(repoPairId: Int): OnlineSource =
         OnlineSource(
@@ -24,10 +22,4 @@ class BareOnlineSource(
             repo = repo,
             pullId = pullId,
         )
-}
-
-interface IOnlineSource {
-    val repo: Repo
-    val coordinates: Coordinates
-    val pullId: Int
 }

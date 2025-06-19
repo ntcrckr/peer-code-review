@@ -15,7 +15,8 @@ fun String.nameOfCopy(prefix: String = "copyOf"): String =
 
 fun sshUrl(userName: String, repositoryName: String): String = "git@github.com:$userName/$repositoryName.git"
 
-private val db = Database.connect("jdbc:h2:./data/pcrp_temp;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
+private val db =
+    Database.connect("jdbc:h2:./data/pcrp_temp;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
 
 fun <T> pcrpTransaction(statement: Transaction.() -> T): T =
     transaction(db, statement = statement)

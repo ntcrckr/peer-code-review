@@ -28,7 +28,8 @@ dependencies {
     implementation("com.github.mwiede:jsch:0.2.25")
 
     // GitHub REST API wrapper
-    implementation("com.jcabi:jcabi-github:1.9.1")
+//    implementation("com.jcabi:jcabi-github:1.9.1")
+    implementation(files("libs/jcabi-github-2.0-SNAPSHOT-jar-with-dependencies.jar"))
     implementation("org.glassfish:javax.json:1.1.4")
 
     // Exposed ORM

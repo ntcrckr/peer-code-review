@@ -3,13 +3,14 @@ package ru.ntcrckr.peer.code.review.dao
 import com.jcabi.github.Comment
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.Column
+import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import ru.ntcrckr.peer.code.review.dao.PullIssueComments.Inserter
 import ru.ntcrckr.peer.code.review.pair.github.id
 
 object PullIssueComments : IntIdTable() {
-    val repoPairId = integer("repo_pair_id").references(RepoPairs.id)
+    val repoPairId = integer("repo_pair_id").references(RepoPairs.id, onDelete = CASCADE)
     val sourceCommentId = long("source_comment_id")
     val copyCommentId = long("copy_comment_id")
 
